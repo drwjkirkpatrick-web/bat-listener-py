@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.bat_listener_settings.json
+*.wav
+*.png
+venv/
+.venv/
