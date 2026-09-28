@@ -12,86 +12,34 @@ Research basis:
   #2  — Colorado State University / USGS: CNN with range maps as geographic
         prior eliminates impossible predictions (Khalighifar et al. 2022).
 
-This module ships a built-in species-range database for the 12 species
-already in the species_guide, plus a simple lat/lon bounding-box check.
+This module uses the global species database (108+ species across Europe,
+North America, South America, and Africa) with bounding-box geographic ranges.
 Range data is simplified to bounding boxes for offline use; a GBIF/IUCN
 API lookup could provide more precise polygons for online use.
 """
 
 from dataclasses import dataclass
-from species_guide import SPECIES_DATABASE, BatSpecies
+from species_guide import SPECIES_DATABASE as _EU_SPECIES, BatSpecies
+from species_range_data import SpeciesRange, EUROPEAN_SPECIES_RANGES as _EU_RANGES
+
+# Import the global database for ranges and species.
+# This is done at module level so that SPECIES_DATABASE and SPECIES_RANGES
+# are available to all functions.
+try:
+    from global_species_database import (
+        GLOBAL_SPECIES_DATABASE as SPECIES_DATABASE,
+        GLOBAL_SPECIES_RANGES as SPECIES_RANGES,
+    )
+    _USE_GLOBAL = True
+except Exception:
+    # Fall back to European-only database if global import fails.
+    SPECIES_DATABASE = _EU_SPECIES
+    SPECIES_RANGES = _EU_RANGES
+    _USE_GLOBAL = False
 
 
-@dataclass
-class SpeciesRange:
-    """
-    Geographic range for a bat species (simplified bounding box).
-
-    For production use, these should be replaced with IUCN range polygons.
-    The bounding box is a coarse approximation — some species have patchy
-    distributions within their box.
-
-    Attributes:
-        species:     The BatSpecies this range applies to.
-        min_lat:     Southern boundary (degrees, -90 to 90).
-        max_lat:     Northern boundary (degrees, -90 to 90).
-        min_lon:     Western boundary (degrees, -180 to 180).
-        max_lon:     Eastern boundary (degrees, -180 to 180).
-        continents:  List of continents where the species occurs.
-    """
-    species: BatSpecies
-    min_lat: float
-    max_lat: float
-    min_lon: float
-    max_lon: float
-    continents: list[str]
-
-
-# ---------------------------------------------------------------------------
-# Species Range Database
-#
-# Bounding boxes for the 12 European species in our database.
-# Source: IUCN Red List range maps (simplified to bounding boxes).
-# These cover the European/Mediterranean range of each species.
-# ---------------------------------------------------------------------------
-SPECIES_RANGES: list[SpeciesRange] = [
-    SpeciesRange(SPECIES_DATABASE[0],   # Noctule
-                 min_lat=35.0, max_lat=65.0, min_lon=-10.0, max_lon=60.0,
-                 continents=["Europe", "Asia"]),
-    SpeciesRange(SPECIES_DATABASE[1],   # Leisler's Bat
-                 min_lat=25.0, max_lat=60.0, min_lon=-10.0, max_lon=70.0,
-                 continents=["Europe", "Asia", "Africa"]),
-    SpeciesRange(SPECIES_DATABASE[2],   # Serotine
-                 min_lat=35.0, max_lat=58.0, min_lon=-10.0, max_lon=60.0,
-                 continents=["Europe", "Asia"]),
-    SpeciesRange(SPECIES_DATABASE[3],   # Barbastelle
-                 min_lat=35.0, max_lat=62.0, min_lon=-10.0, max_lon=50.0,
-                 continents=["Europe", "Asia"]),
-    SpeciesRange(SPECIES_DATABASE[4],   # Nathusius' Pipistrelle
-                 min_lat=35.0, max_lat=65.0, min_lon=-10.0, max_lon=70.0,
-                 continents=["Europe", "Asia"]),
-    SpeciesRange(SPECIES_DATABASE[5],   # Common Pipistrelle
-                 min_lat=30.0, max_lat=65.0, min_lon=-10.0, max_lon=80.0,
-                 continents=["Europe", "Asia", "Africa"]),
-    SpeciesRange(SPECIES_DATABASE[6],   # Soprano Pipistrelle
-                 min_lat=35.0, max_lat=65.0, min_lon=-10.0, max_lon=60.0,
-                 continents=["Europe", "Asia"]),
-    SpeciesRange(SPECIES_DATABASE[7],   # Daubenton's Bat
-                 min_lat=35.0, max_lat=68.0, min_lon=-10.0, max_lon=140.0,
-                 continents=["Europe", "Asia"]),
-    SpeciesRange(SPECIES_DATABASE[8],   # Natterer's Bat
-                 min_lat=35.0, max_lat=65.0, min_lon=-10.0, max_lon=60.0,
-                 continents=["Europe", "Asia"]),
-    SpeciesRange(SPECIES_DATABASE[9],   # Brown Long-eared
-                 min_lat=35.0, max_lat=68.0, min_lon=-10.0, max_lon=140.0,
-                 continents=["Europe", "Asia"]),
-    SpeciesRange(SPECIES_DATABASE[10],  # Greater Horseshoe
-                 min_lat=30.0, max_lat=53.0, min_lon=-10.0, max_lon=50.0,
-                 continents=["Europe", "Asia", "Africa"]),
-    SpeciesRange(SPECIES_DATABASE[11],  # Lesser Horseshoe
-                 min_lat=30.0, max_lat=55.0, min_lon=-10.0, max_lon=50.0,
-                 continents=["Europe", "Asia", "Africa"]),
-]
+# Note: SpeciesRange dataclass and SPECIES_RANGES are imported from
+# species_range_data / global_species_database at the top of this file.
 
 
 class GeoFilter:
