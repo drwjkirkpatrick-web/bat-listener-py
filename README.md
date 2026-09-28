@@ -127,15 +127,32 @@ bat-listener-py/
 ├── run.sh
 ├── .gitignore
 ├── docs/
+│   ├── 30_improvements_research.md
 │   └── ui_test_screenshot.png
 └── src/
-    ├── main.py              # Entry point, main loop, event dispatch
-    ├── audio_engine.py      # Modules 1+2+5: audio I/O, frequency shift, filters
-    ├── spectrogram.py       # Module 3: real-time spectrogram rendering
-    ├── species_guide.py     # Module 4: species database + frequency matching
-    ├── recorder.py          # Module 6: recording and WAV/PNG export
-    ├── ui_canvas.py         # Module 7: canvas rendering, buttons, sliders
-    └── settings.py          # JSON settings persistence
+    ├── main.py                  # Entry point, main loop, event dispatch
+    │
+    ├── --- Original 7 Modules ---
+    ├── audio_engine.py          # Modules 1+2+5: audio I/O, frequency shift, filters
+    ├── spectrogram.py           # Module 3: real-time spectrogram rendering
+    ├── species_guide.py         # Module 4: species database + frequency matching
+    ├── recorder.py              # Module 6: recording and WAV/PNG export
+    ├── ui_canvas.py             # Module 7: canvas rendering, buttons, sliders
+    ├── settings.py              # JSON settings persistence
+    │
+    ├── --- 12 New Research-Backed Modules ---
+    ├── call_parameters.py       # #16: Call param extraction (Fpeak, IPI, slope)
+    ├── noise_suppression.py     # #14,#15: Spectral subtraction + Wiener filtering
+    ├── guano_metadata.py        # #17,#21: GUANO metadata read/write
+    ├── advanced_spectrogram.py  # #5,#6,#7,#12,#13,#20: PCEN, CQT, mel, wavelet, WVD, cepstrogram
+    ├── survey_protocols.py     # #22,#24: EUROBATS/BCT survey modes + duty-cycle metrics
+    ├── environmental_data.py   # #25: Temperature, humidity, moon phase, sunset covariates
+    ├── geo_filter.py            # #2,#26: Geographic species range filtering
+    ├── activity_metrics.py      # #23,#27,#28: Feeding buzz detection, TPP, heatmaps
+    ├── triggered_recording.py   # #18: AudioMoth-style amplitude threshold triggering
+    ├── signal_tracking.py       # #8,#10: TFC isolation + particle filter frequency tracking
+    ├── classifier_backend.py    # #1,#3,#4,#9,#11,#19: ML + rule-based species classification
+    └── citizen_science.py       # #29,#30: Device detection + Darwin Core export
 ```
 
 ## Comparison with the Original HTML App
