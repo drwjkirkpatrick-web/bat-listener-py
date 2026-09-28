@@ -39,6 +39,7 @@ Usage:
 from species_guide import SPECIES_DATABASE, BatSpecies
 from north_american_species import NORTH_AMERICAN_SPECIES
 from south_american_species import SOUTH_AMERICAN_SPECIES
+from african_species import AFRICAN_SPECIES
 
 
 def _dict_to_batspecies(d: dict, family: str = "", region: str = "") -> BatSpecies:
@@ -89,11 +90,17 @@ SOUTH_AMERICAN_BATS: list[BatSpecies] = [
     for d in SOUTH_AMERICAN_SPECIES
 ]
 
+# African species (convert from dict format, 100 species)
+AFRICAN_BATS: list[BatSpecies] = [
+    _dict_to_batspecies(d, d.get("family", ""), "Africa")
+    for d in AFRICAN_SPECIES
+]
+
 # Combined global database (deduplicated by scientific name)
 _SEEN_SCIENTIFIC: set[str] = set()
 GLOBAL_SPECIES_DATABASE: list[BatSpecies] = []
 
-for species in EUROPEAN_SPECIES + NORTH_AMERICAN_BATS + SOUTH_AMERICAN_BATS:
+for species in EUROPEAN_SPECIES + NORTH_AMERICAN_BATS + SOUTH_AMERICAN_BATS + AFRICAN_BATS:
     sci_key = species.scientific.lower()
     if sci_key not in _SEEN_SCIENTIFIC:
         GLOBAL_SPECIES_DATABASE.append(species)
@@ -136,8 +143,22 @@ for d in SOUTH_AMERICAN_SPECIES:
             continents=d.get("continents", ["South America"]),
         ))
 
+# Build range entries for African species
+_AF_RANGE_MAP: list[SpeciesRange] = []
+for d in AFRICAN_SPECIES:
+    sp = next((s for s in AFRICAN_BATS if s.scientific == d["scientific"]), None)
+    if sp:
+        _AF_RANGE_MAP.append(SpeciesRange(
+            species=sp,
+            min_lat=float(d.get("min_lat", -35)),
+            max_lat=float(d.get("max_lat", 37)),
+            min_lon=float(d.get("min_lon", -20)),
+            max_lon=float(d.get("max_lon", 52)),
+            continents=d.get("continents", ["Africa"]),
+        ))
+
 # Combined global ranges
-GLOBAL_SPECIES_RANGES: list[SpeciesRange] = _EU_RANGES + _NA_RANGE_MAP + _SA_RANGE_MAP
+GLOBAL_SPECIES_RANGES: list[SpeciesRange] = _EU_RANGES + _NA_RANGE_MAP + _SA_RANGE_MAP + _AF_RANGE_MAP
 
 
 # ---------------------------------------------------------------------------
@@ -160,6 +181,8 @@ def get_species_by_region(region: str) -> list[BatSpecies]:
         return NORTH_AMERICAN_BATS
     elif region.lower() == "south_america":
         return SOUTH_AMERICAN_BATS
+    elif region.lower() == "africa":
+        return AFRICAN_BATS
     elif region.lower() == "all":
         return GLOBAL_SPECIES_DATABASE
     else:
@@ -209,6 +232,7 @@ def get_species_count() -> dict:
         "europe": len(EUROPEAN_SPECIES),
         "north_america": len(NORTH_AMERICAN_BATS),
         "south_america": len(SOUTH_AMERICAN_BATS),
+        "africa": len(AFRICAN_BATS),
     }
 
     # Count by call category
